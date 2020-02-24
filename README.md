@@ -1,5 +1,5 @@
 # soccermath
 Math and soccer, soccer and math, it's soccermath
 
-## Running
+## Install
 npm install, npx http-server
