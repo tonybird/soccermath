@@ -49,6 +49,15 @@ function easyProblem() {
   return outputArray;
 }
 
+function newProblem() {
+  mathProblem = easyProblem();
+  leftAnswer.text = mathProblem[1][0];
+  middleAnswer.text = mathProblem[1][1];
+  rightAnswer.text = mathProblem[1][2];
+  problem.text = mathProblem[0];
+  answerPosition = mathProblem[2];
+}
+
 //Create a Pixi Application
 let app = new PIXI.Application({
   backgroundColor: 0x061639,
@@ -96,11 +105,11 @@ function setup() {
   let problemY = 50;
   let answerY = 150;
 
-  leftAnswer = new PIXI.Text(mathProblem[1][0], { font: 'bold 80px Arial', fill: '#cc00ff', align: 'center', stroke: '#FFFFFF', strokeThickness: 6 });
-  middleAnswer = new PIXI.Text(mathProblem[1][1], { font: 'bold 80px Arial', fill: '#cc00ff', align: 'center', stroke: '#FFFFFF', strokeThickness: 6 });
-  rightAnswer = new PIXI.Text(mathProblem[1][2], { font: 'bold 80px Arial', fill: '#cc00ff', align: 'center', stroke: '#FFFFFF', strokeThickness: 6 });
-  problem = new PIXI.Text(mathProblem[0], { font: 'bold 80px Arial', fill: '#cc00ff', align: 'center', stroke: '#FFFFFF', strokeThickness: 6 });
-  answerPosition = mathProblem[2];
+  leftAnswer = new PIXI.Text("", { font: 'bold 80px Arial', fill: '#cc00ff', align: 'center', stroke: '#FFFFFF', strokeThickness: 6 });
+  middleAnswer = new PIXI.Text("", { font: 'bold 80px Arial', fill: '#cc00ff', align: 'center', stroke: '#FFFFFF', strokeThickness: 6 });
+  rightAnswer = new PIXI.Text("", { font: 'bold 80px Arial', fill: '#cc00ff', align: 'center', stroke: '#FFFFFF', strokeThickness: 6 });
+  problem = new PIXI.Text("", { font: 'bold 80px Arial', fill: '#cc00ff', align: 'center', stroke: '#FFFFFF', strokeThickness: 6 });
+  newProblem();
 
   leftArrow = new PIXI.Sprite(
     PIXI.loader.resources["images/left_arrow.png"].texture
@@ -189,6 +198,7 @@ function play(delta) {
   if (shoot) {
     if (answerPosition == position) {
       alert("correct!");
+      newProblem();
     } else {
       alert("incorrect");
     }
