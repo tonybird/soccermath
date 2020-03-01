@@ -1,50 +1,211 @@
-PIXI.utils.sayHello();
+// import { easyProblem, mediumProblem } from "./math.js";
 
-// create a canvas for all game elements
-const renderer = PIXI.autoDetectRenderer(512, 512, {
-  transparent: true,
-  resolution: 1
+function easyProblem() {
+  let x = Math.floor((Math.random() * 20) + 1);
+  let y = Math.floor((Math.random() * 20) + 1);
+
+  let ops = ["+", "-"];
+
+  let rndOp = ops[Math.floor(Math.random() * ops.length)];
+
+  if (rndOp == "-") {
+      let temp = 0
+      if (y > x) {
+          temp = x;
+          x = y;
+          y = temp;
+      }
+  }
+
+  let answer = 0;
+  if (rndOp == "+") {
+      answer = x + y;
+  } else {
+      answer = x - y
+  }
+
+  let problem = (x + " " + rndOp + " " + y + " = ?");
+  let answersArray = [answer];
+
+  while (answersArray.length < 3) {
+      let wrongAnswer = Math.floor((Math.random() * 20) + 1);
+      if(answersArray.indexOf(wrongAnswer) == -1) {
+          answersArray.push(wrongAnswer);
+      }
+  }
+
+  for (let i = answersArray.length - 1; i > 0; i--) {
+      let j = Math.floor(Math.random() * (i + 1));
+      [answersArray[i], answersArray[j]] = [answersArray[j], answersArray[i]];
+  }
+
+  let outputArray = [problem, answersArray, answersArray.indexOf(answer)];
+
+  // console.log(problem);
+  // console.log(answersArray);
+  // console.log("The answer is " + answer);
+  // console.log(outputArray);
+  
+  return outputArray;
+}
+
+//Create a Pixi Application
+let app = new PIXI.Application({
+  backgroundColor: 0x061639,
+  width: 612,         // default: 800
+  height: 464,        // default: 600
+  antialias: true,    // default: false
+  transparent: false, // default: false
+  resolution: 1       // default: 1
 });
-const displayDiv = document.querySelector('#display')
-displayDiv.appendChild(renderer.view);
-const stage = new PIXI.Container();
 
-// load the spritesheet, first arg could name anything you want
-// second arg will be the path of the png file
+// app.renderer.view.style.position = "absolute";
+// app.renderer.view.style.display = "block";
+// app.renderer.autoResize = true;
+// app.renderer.resize(window.innerWidth, window.innerHeight);
+
+document.body.appendChild(app.view);
+
 PIXI.loader
-  .add("images/ball.png")
+  .add([
+    "images/soccer_goal.jpg",
+    "images/left_arrow.png",
+    "images/right_arrow.png",
+    "images/up_arrow.png"
+  ])
   .load(setup);
 
-let ball;
+let mathProblem = easyProblem();
+console.log(mathProblem[0]);
+let position = 1;
+let shoot = false;
+let problem, leftArrow, leftAnswer, middleArrow, middleAnswer, rightArrow, rightAnswer, answerPosition;
+
 function setup() {
-  stage.interactive = true;
+  let background = new PIXI.Sprite(
+    PIXI.loader.resources["images/soccer_goal.jpg"].texture
+  );
 
-  ball = new PIXI.Sprite(PIXI.loader.resources["images/ball.png"].texture);
+  let leftX = 100;
+  let middleX = 285;
+  let rightX = 465;
 
-//   const texture = PIXI.loader.resources["spritesheet"].texture;
-  
-  // highly recommend to use scale to change frame size
-  ball.scale.set(0.1, 0.1); 
-  ball.vx = 10;
-  ball.vy = 10;
-  stage.addChild(ball); // add sprite to stage area
-  animationLoop();
+  let arrowY = 400;
+  let arrowWidthHeight = 50;
+
+  let problemY = 50;
+  let answerY = 150;
+
+  leftAnswer = new PIXI.Text(mathProblem[1][0], { font: 'bold 80px Arial', fill: '#cc00ff', align: 'center', stroke: '#FFFFFF', strokeThickness: 6 });
+  middleAnswer = new PIXI.Text(mathProblem[1][1], { font: 'bold 80px Arial', fill: '#cc00ff', align: 'center', stroke: '#FFFFFF', strokeThickness: 6 });
+  rightAnswer = new PIXI.Text(mathProblem[1][2], { font: 'bold 80px Arial', fill: '#cc00ff', align: 'center', stroke: '#FFFFFF', strokeThickness: 6 });
+  problem = new PIXI.Text(mathProblem[0], { font: 'bold 80px Arial', fill: '#cc00ff', align: 'center', stroke: '#FFFFFF', strokeThickness: 6 });
+  answerPosition = mathProblem[2];
+
+  leftArrow = new PIXI.Sprite(
+    PIXI.loader.resources["images/left_arrow.png"].texture
+  );
+  leftArrow.width = arrowWidthHeight;
+  leftArrow.height = arrowWidthHeight;
+  leftArrow.x = leftX;
+  leftArrow.y = arrowY;
+  if (position != 0) {
+    leftArrow.visible = false;
+  }
+
+  middleArrow = new PIXI.Sprite(
+    PIXI.loader.resources["images/up_arrow.png"].texture
+  );
+  middleArrow.width = arrowWidthHeight;
+  middleArrow.height = arrowWidthHeight;
+  middleArrow.x = middleX;
+  middleArrow.y = arrowY;
+  if (position != 1) {
+    middleArrow.visible = false;
+  }
+
+  rightArrow = new PIXI.Sprite(
+    PIXI.loader.resources["images/right_arrow.png"].texture
+  );
+  rightArrow.width = arrowWidthHeight;
+  rightArrow.height = arrowWidthHeight;
+  rightArrow.x = rightX;
+  rightArrow.y = arrowY;
+  if (position != 2) {
+    rightArrow.visible = false;
+  }
+
+  leftAnswer.position.x = leftX;
+  leftAnswer.position.y = answerY;
+
+  middleAnswer.position.x = middleX;
+  middleAnswer.position.y = answerY;
+
+  rightAnswer.position.x = rightX;
+  rightAnswer.position.y = answerY;
+
+  problem.position.x = middleX;
+  problem.position.y = problemY;
+  problem.anchor.set(0.5);
+
+  // first added child is furthest back
+  app.stage.addChild(background);
+  app.stage.addChild(leftAnswer);
+  app.stage.addChild(middleAnswer);
+  app.stage.addChild(rightAnswer);
+  app.stage.addChild(problem);
+  app.stage.addChild(leftArrow);
+  app.stage.addChild(middleArrow);
+  app.stage.addChild(rightArrow);
+
+  // Set the game state
+  state = play;
+
+  // Start the game loop 
+  app.ticker.add(delta => gameLoop(delta));
+
 }
-// helper function 
-function animationLoop() {
-  // a function from Pixi
-  requestAnimationFrame(animationLoop);
-  renderer.render(stage);
-};
+
+function gameLoop(delta) {
+  // Update the current game state:
+  state(delta);
+}
+
+function play(delta) {
+  if (position == 0) {
+    leftArrow.visible = true;
+    middleArrow.visible = false;
+    rightArrow.visible = false;
+  } else if (position == 1) {
+    leftArrow.visible = false;
+    middleArrow.visible = true;
+    rightArrow.visible = false;
+  } else if (position == 2) {
+    leftArrow.visible = false;
+    middleArrow.visible = false;
+    rightArrow.visible = true;
+  }
+
+  if (shoot) {
+    if (answerPosition == position) {
+      alert("correct!");
+    } else {
+      alert("incorrect");
+    }
+  }
+  shoot = false;
+}
 
 window.addEventListener('keydown', event => {
-    if (event.key === 'ArrowRight' && ball.x < 650) {
-        ball.x += ball.vx
-    } else if (event.key === 'ArrowLeft' && ball.x > 0) {
-        ball.x -= ball.vx
-    } else if (event.key === 'ArrowDown' && ball.y < 450) {
-        ball.y += ball.vy
-    } else if (event.key === 'ArrowUp' && ball.y > 0) {
-        ball.y -= ball.vy
+  if (event.key === 'ArrowRight') {
+    if (position == 0) {
+      position = 1;
+    } else if (position == 1) {
+      position = 2;
+    } else {
+      position = 0;
     }
-  })
+  } else if (event.key === 'Enter') {
+    shoot = true;
+  }
+});
