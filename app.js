@@ -1,61 +1,87 @@
 // import { easyProblem, mediumProblem } from "./math.js";
 
+function generateProblem(x, y, op, answerRange) {
+  let correctAnswer = 0;
+  switch(op) {
+    case "+":
+      correctAnswer = x + y;
+      break;
+    case "-":
+      correctAnswer = x - y;
+      break;
+    case "*":
+      correctAnswer = x * y;
+      break;
+  }
+
+  let answers = [correctAnswer];
+  while (answers.length < 3) {
+      let wrongAnswer = Math.floor((Math.random() * answerRange) + 1);
+      if(!answers.includes(wrongAnswer)) {
+          answers.push(wrongAnswer);
+      }
+  }
+
+  // Shuffle order of answers
+  for (let i = answers.length - 1; i > 0; i--) {
+      let j = Math.floor(Math.random() * (i + 1));
+      [answers[i], answers[j]] = [answers[j], answers[i]];
+  }
+
+  let problemString = `${x} ${op} ${y} = ?`;
+  let correctIndex = answers.indexOf(correctAnswer);
+  return {problemString, answers, correctIndex};
+}
+
 function easyProblem() {
+  let ops = ["+", "-"];
+  let op = ops[Math.floor(Math.random() * ops.length)];
   let x = Math.floor((Math.random() * 20) + 1);
   let y = Math.floor((Math.random() * 20) + 1);
 
-  let ops = ["+", "-"];
-
-  let rndOp = ops[Math.floor(Math.random() * ops.length)];
-
-  if (rndOp == "-") {
-      let temp = 0
-      if (y > x) {
-          temp = x;
-          x = y;
-          y = temp;
-      }
+  // Avoid negative results
+  if (op == "-" && x < y) {
+      [x,y] = [y,x];
   }
 
-  let answer = 0;
-  if (rndOp == "+") {
-      answer = x + y;
-  } else {
-      answer = x - y
-  }
-
-  let problem = (x + " " + rndOp + " " + y + " = ?");
-  let answersArray = [answer];
-
-  while (answersArray.length < 3) {
-      let wrongAnswer = Math.floor((Math.random() * 20) + 1);
-      if(answersArray.indexOf(wrongAnswer) == -1) {
-          answersArray.push(wrongAnswer);
-      }
-  }
-
-  for (let i = answersArray.length - 1; i > 0; i--) {
-      let j = Math.floor(Math.random() * (i + 1));
-      [answersArray[i], answersArray[j]] = [answersArray[j], answersArray[i]];
-  }
-
-  let outputArray = [problem, answersArray, answersArray.indexOf(answer)];
-
-  // console.log(problem);
-  // console.log(answersArray);
-  // console.log("The answer is " + answer);
-  // console.log(outputArray);
-  
-  return outputArray;
+  return generateProblem(x, y, op, 20);
 }
 
-function newProblem() {
-  mathProblem = easyProblem();
-  leftAnswer.text = mathProblem[1][0];
-  middleAnswer.text = mathProblem[1][1];
-  rightAnswer.text = mathProblem[1][2];
-  problem.text = mathProblem[0];
-  answerPosition = mathProblem[2];
+function mediumProblem() {
+  let ops = ["+", "-", "*"];
+  let op = ops[Math.floor(Math.random() * ops.length)];
+
+  let x, y;
+  if (op == "*") {
+    x = Math.floor((Math.random() * 12) + 1);
+    y = Math.floor((Math.random() * 12) + 1);
+  } else {
+    x = Math.floor((Math.random() * 50) + 1);
+    y = Math.floor((Math.random() * 50) + 1);
+  }
+
+  // Avoid negative results
+  if (op == "-" && x < y) {
+    [x,y] = [y,x];
+  }
+
+  return generateProblem(x, y, op, 80);
+}
+
+function getNewProblem(difficulty) {
+  switch(difficulty) {
+    case "easy":
+      mathProblem = easyProblem();
+      break;
+    case "medium":
+      mathProblem = mediumProblem();
+      break;
+  }
+  leftAnswer.text = mathProblem.answers[0];
+  middleAnswer.text = mathProblem.answers[1];
+  rightAnswer.text = mathProblem.answers[2];
+  problem.text = mathProblem.problemString;
+  answerPosition = mathProblem.correctIndex;
 }
 
 //Create a Pixi Application
@@ -86,8 +112,10 @@ PIXI.loader
   .load(setup);
 
 let shoot = false;
+let inactiveArrowAlpha = 0.3;
 let leftArrow, leftAnswer, middleArrow, middleAnswer, rightArrow, rightAnswer;
 let problem, answerPosition, score = 0, streak = 0, position = 0;
+let difficulty = "easy";
 
 function setup() {
   let background = new PIXI.Sprite(
@@ -127,7 +155,7 @@ function setup() {
   middleAnswer = new PIXI.Text("", { font: 'bold 80px Arial', fill: '#cc00ff', align: 'center', stroke: '#FFFFFF', strokeThickness: 6 });
   rightAnswer = new PIXI.Text("", { font: 'bold 80px Arial', fill: '#cc00ff', align: 'center', stroke: '#FFFFFF', strokeThickness: 6 });
   problem = new PIXI.Text("", { font: 'bold 80px Arial', fill: '#cc00ff', align: 'center', stroke: '#FFFFFF', strokeThickness: 6 });
-  newProblem();
+  getNewProblem(difficulty);
 
   leftArrow = new PIXI.Sprite(
     PIXI.loader.resources["images/left_arrow.png"].texture
@@ -138,7 +166,7 @@ function setup() {
   leftArrow.x = leftX;
   leftArrow.y = arrowY;
   if (position != 0) {
-    leftArrow.visible = false;
+    leftArrow.alpha = inactiveArrowAlpha;
   }
 
   middleArrow = new PIXI.Sprite(
@@ -150,7 +178,7 @@ function setup() {
   middleArrow.x = middleX;
   middleArrow.y = arrowY;
   if (position != 1) {
-    middleArrow.visible = false;
+    middleArrow.alpha = inactiveArrowAlpha;
   }
 
   rightArrow = new PIXI.Sprite(
@@ -161,8 +189,9 @@ function setup() {
   rightArrow.anchor.set(0.5);
   rightArrow.x = rightX;
   rightArrow.y = arrowY;
+  rightArrow.alpha = 0.5;
   if (position != 2) {
-    rightArrow.visible = false;
+    rightArrow.alpha = inactiveArrowAlpha;
   }
 
   leftAnswer.position.x = leftX;
@@ -171,6 +200,7 @@ function setup() {
 
   middleAnswer.position.x = middleX;
   middleAnswer.position.y = answerY;
+  middleAnswer.accessible = true;
   middleAnswer.anchor.set(0.5);
 
   rightAnswer.position.x = rightX;
@@ -181,7 +211,17 @@ function setup() {
   problem.position.y = problemY;
   problem.anchor.set(0.5);
 
-  
+  // leftArrow.buttonMode = true;
+  // leftArrow.interactive = true;
+  // leftArrow.accessible = true;
+
+  // middleArrow.buttonMode = true;
+  // middleArrow.interactive = true;
+  // middleArrow.accessible = true;
+
+  // rightArrow.buttonMode = true;
+  // rightArrow.interactive = true;
+  // rightArrow.accessible = true;
 
   // first added child is furthest back
   app.stage.addChild(background);
@@ -210,17 +250,17 @@ function gameLoop(delta) {
 
 function play(delta) {
   if (position == 0) {
-    leftArrow.visible = true;
-    middleArrow.visible = false;
-    rightArrow.visible = false;
+    leftArrow.alpha = 1;
+    middleArrow.alpha = inactiveArrowAlpha;
+    rightArrow.alpha = inactiveArrowAlpha;
   } else if (position == 1) {
-    leftArrow.visible = false;
-    middleArrow.visible = true;
-    rightArrow.visible = false;
+    leftArrow.alpha = inactiveArrowAlpha;
+    middleArrow.alpha = 1;
+    rightArrow.alpha = inactiveArrowAlpha;
   } else if (position == 2) {
-    leftArrow.visible = false;
-    middleArrow.visible = false;
-    rightArrow.visible = true;
+    leftArrow.alpha = inactiveArrowAlpha;
+    middleArrow.alpha = inactiveArrowAlpha;
+    rightArrow.alpha = 1;
   }
 
   if (shoot) {
@@ -228,8 +268,8 @@ function play(delta) {
       score++;
       streak++;
       scoreDisplay.text = "Score: " + score;
-      if (streak >= 5) alert("Streak: " + streak);
-      newProblem();
+      if (streak % 5 == 0) alert("Streak: " + streak);
+      getNewProblem(difficulty);
     } else {
       streak = 0;
       alert("Incorrect");
@@ -239,7 +279,7 @@ function play(delta) {
 }
 
 window.addEventListener('keydown', event => {
-  if (event.key === 'ArrowRight') {
+  if (event.key === 'ArrowRight' || event.key === 'Tab') {
     position++;
     if (position == 3) position = 0;
   } else if (event.key === 'ArrowLeft') {
