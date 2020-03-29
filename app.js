@@ -107,38 +107,46 @@ PIXI.loader
     "images/left_arrow.png",
     "images/right_arrow.png",
     "images/up_arrow.png",
-    "images/ball.png"
+    "images/ball.png",
+    "images/goalie.png",
+    "images/diving_goalie_noball.png"
   ])
   .load(setup);
 
 let shoot = false;
+let shotBall = false;
 let inactiveArrowAlpha = 0.3;
 let leftArrow, leftAnswer, middleArrow, middleAnswer, rightArrow, rightAnswer;
 let problem, answerPosition, score = 0, streak = 0, position = 0;
 let difficulty = "easy";
+let ball;
+let leftX, middleX, rightX, answerY, ballY;
 
 function setup() {
   let background = new PIXI.Sprite(
     PIXI.loader.resources["images/soccer_goal.jpg"].texture
   );
 
-  let leftX = 110;
-  let middleX = 306;
-  let rightX = 495;
+  leftX = 110;
+  middleX = 306;
+  rightX = 495;
 
-  let arrowY = 400;
+  let arrowY = 430;
   let arrowSize = 50;
 
   let problemY = 50;
-  let answerY = 150;
+  answerY = 150;
 
-  let ballY = 350;
+  ballY = 380;
   let ballSize = 50;
 
   let scoreX = 480;
   let scoreY = 15;
 
-  let ball = new PIXI.Sprite(
+  let goalieY = 270;
+  let goalieSize = 250;
+
+  ball = new PIXI.Sprite(
     PIXI.loader.resources["images/ball.png"].texture
   );
   ball.anchor.set(0.5);
@@ -146,6 +154,26 @@ function setup() {
   ball.height = ballSize;
   ball.x = middleX;
   ball.y = ballY;
+  ball.vx = 0;
+  ball.vy = 0;
+
+  let goalie = new PIXI.Sprite(
+    PIXI.loader.resources["images/goalie.png"].texture
+  );
+  goalie.anchor.set(0.5);
+  goalie.width = goalieSize;
+  goalie.height = goalieSize;
+  goalie.x = 312;
+  goalie.y = goalieY;
+
+  let divingGoalie = new PIXI.Sprite(
+    PIXI.loader.resources["images/diving_goalie_noball.png"].texture
+  );
+  divingGoalie.anchor.set(0.5);
+  divingGoalie.width = goalieSize;
+  divingGoalie.height = goalieSize;
+  divingGoalie.x = 312;
+  divingGoalie.y = goalieY;
 
   scoreDisplay = new PIXI.Text("Score: 0", { font: 'bold 80px Arial', fill: 'yellow', align: 'center' });
   scoreDisplay.x = scoreX;
@@ -234,6 +262,8 @@ function setup() {
   app.stage.addChild(rightArrow);
   app.stage.addChild(scoreDisplay);
   app.stage.addChild(ball);
+  app.stage.addChild(goalie);
+  // app.stage.addChild(divingGoalie);
 
   // Set the game state
   state = play;
@@ -249,6 +279,8 @@ function gameLoop(delta) {
 }
 
 function play(delta) {
+
+  // Arrow behavior
   if (position == 0) {
     leftArrow.alpha = 1;
     middleArrow.alpha = inactiveArrowAlpha;
@@ -263,9 +295,53 @@ function play(delta) {
     rightArrow.alpha = 1;
   }
 
-  if (shoot) {
+  // Renders the ball animations depending on selected location
+  if (shoot && shotBall == false) {
+    if (position == 0) {
+      if (ball.x <= leftX) {
+        ball.vx = 0;
+        ball.vy = 0;
+        ball.x = middleX;
+        ball.y = ballY;
+        shotBall = true;
+      } else {
+        ball.vx = -6;
+        ball.x += ball.vx;
+        ball.vy = -6;
+        ball.y += ball.vy;
+      }
+    }
+    if (position == 1) {
+      if (ball.y <= answerY) {
+        ball.vx = 0;
+        ball.vy = 0;
+        ball.x = middleX;
+        ball.y = ballY;
+        shotBall = true;
+      } else {
+        ball.vy = -8;
+        ball.y += ball.vy;
+      }
+    }
+    if (position == 2) {
+      if (ball.x >= rightX) {
+        ball.vx = 0;
+        ball.vy = 0;
+        ball.x = middleX;
+        ball.y = ballY;
+        shotBall = true;
+      } else {
+        ball.vx = 6;
+        ball.x += ball.vx;
+        ball.vy = -6;
+        ball.y += ball.vy;
+      }
+    }
+  }
+  // Checks if right or wrong and updates score accordingly, resets for next round
+  if (shoot && shotBall) {
     if (answerPosition == position) {
-      score++;
+      score++; 
       streak++;
       scoreDisplay.text = "Score: " + score;
       if (streak % 5 == 0) alert("Streak: " + streak);
@@ -274,8 +350,10 @@ function play(delta) {
       streak = 0;
       alert("Incorrect");
     }
+    shoot = false;
+    // reset arrow to middle after shot
+    position = 1;
   }
-  shoot = false;
 }
 
 window.addEventListener('keydown', event => {
@@ -287,5 +365,6 @@ window.addEventListener('keydown', event => {
     if (position == -1) position = 2;
   } else if (event.key === 'Enter') {
     shoot = true;
+    shotBall = false;
   }
 });
