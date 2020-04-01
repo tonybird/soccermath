@@ -119,7 +119,7 @@ let inactiveArrowAlpha = 0.3;
 let leftArrow, leftAnswer, middleArrow, middleAnswer, rightArrow, rightAnswer;
 let problem, answerPosition, score = 0, streak = 0, position = 0;
 let difficulty = "easy";
-let ball;
+let ball, goalie;
 let leftX, middleX, rightX, answerY, ballY;
 
 function setup() {
@@ -157,7 +157,7 @@ function setup() {
   ball.vx = 0;
   ball.vy = 0;
 
-  let goalie = new PIXI.Sprite(
+  goalie = new PIXI.Sprite(
     PIXI.loader.resources["images/goalie.png"].texture
   );
   goalie.anchor.set(0.5);
@@ -165,6 +165,7 @@ function setup() {
   goalie.height = goalieSize;
   goalie.x = 312;
   goalie.y = goalieY;
+  goalie.vx = 1;
 
   let divingGoalie = new PIXI.Sprite(
     PIXI.loader.resources["images/diving_goalie_noball.png"].texture
@@ -295,8 +296,25 @@ function play(delta) {
     rightArrow.alpha = 1;
   }
 
-  // Renders the ball animations depending on selected location
+  // Goalie movement
+  goalie.x += goalie.vx;
+  if (goalie.x < leftX || goalie.x > rightX) {
+    goalie.vx = 0 - goalie.vx;
+  }
+
+  // Handle animations after shot
   if (shoot && shotBall == false) {
+    // Move goalie to block if answer is incorrect
+    if (answerPosition !== position) {
+      if (position === 0) {
+        goalie.x = leftX;
+      } else if (position === 1) {
+        goalie.x = middleX;
+      } else {
+        goalie.x = rightX;
+      }
+    }
+    // Render ball animation
     if (position == 0) {
       if (ball.x <= leftX) {
         ball.vx = 0;
@@ -344,11 +362,12 @@ function play(delta) {
       score++; 
       streak++;
       scoreDisplay.text = "Score: " + score;
-      if (streak % 5 == 0) alert("Streak: " + streak);
+      if (streak % 10 == 0) alert("Streak: " + streak);
       getNewProblem(difficulty);
     } else {
+      // Incorrect
       streak = 0;
-      alert("Incorrect");
+      getNewProblem(difficulty);
     }
     shoot = false;
     // reset arrow to middle after shot
