@@ -121,6 +121,9 @@ let problem, answerPosition, score = 0, streak = 0, position = 0;
 let difficulty = "easy";
 let ball, goalie;
 let leftX, middleX, rightX, answerY, ballY;
+let missSound;
+let goalSound;
+let crowdNoise;
 
 function setup() {
   let background = new PIXI.Sprite(
@@ -272,6 +275,28 @@ function setup() {
   // Start the game loop 
   app.ticker.add(delta => gameLoop(delta));
 
+  // Stadium ambiance plays on a loop
+  crowdNoise = new sound("sounds/crowdSoundEffect.mp3", "crowdSound");
+  document.getElementById("crowdSound").loop = true;
+
+  missSound = new sound("sounds/missSound.wav", "missSound")
+  goalSound = new sound("sounds/goalSound.wav", "goalSound")
+}
+
+function sound(src, id) {
+  this.sound = document.createElement("audio");
+  this.sound.id = id;
+  this.sound.src = src;
+  this.sound.setAttribute("preload", "auto");
+  this.sound.setAttribute("controls", "none");
+  this.sound.style.display = "none";
+  document.body.appendChild(this.sound);
+  this.play = function(){
+    this.sound.play();
+  }
+  this.stop = function(){
+    this.sound.pause();
+  }
 }
 
 function gameLoop(delta) {
@@ -306,6 +331,8 @@ function play(delta) {
   if (shoot && shotBall == false) {
     // Move goalie to block if answer is incorrect
     if (answerPosition !== position) {
+      // Plays crowd jeers when shot is blocked.
+      missSound.play();
       if (position === 0) {
         goalie.x = leftX;
       } else if (position === 1) {
@@ -359,6 +386,8 @@ function play(delta) {
   // Checks if right or wrong and updates score accordingly, resets for next round
   if (shoot && shotBall) {
     if (answerPosition == position) {
+      // Plays cheers when goal is scored
+      goalSound.play();
       score++; 
       streak++;
       scoreDisplay.text = "Score: " + score;
@@ -385,5 +414,8 @@ window.addEventListener('keydown', event => {
   } else if (event.key === 'Enter') {
     shoot = true;
     shotBall = false;
+    // Plays sound when first shot is taken... might move when
+    // we have a START button implemented on our splash page
+    crowdNoise.play();
   }
 });
