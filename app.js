@@ -304,6 +304,17 @@ function gameLoop(delta) {
   state(delta);
 }
 
+function say(text){
+  var speaker= window.speechSynthesis
+  speaker.resume()
+  var msg= new SpeechSynthesisUtterance(text);
+  console.log('speak function called')
+  msg.volume=1.0;
+  speaker.speak(msg);
+}
+
+
+
 function play(delta) {
 
   // Arrow behavior
@@ -408,9 +419,16 @@ window.addEventListener('keydown', event => {
   if (event.key === 'ArrowRight' || event.key === 'Tab') {
     position++;
     if (position == 3) position = 0;
+    if (position == 0) say(leftAnswer.text);
+    if (position == 1) say(middleAnswer.text);
+    if (position == 2) say(rightAnswer.text);
   } else if (event.key === 'ArrowLeft') {
     position--;
     if (position == -1) position = 2;
+    if (position == 3) position = 0;
+    if (position == 0) say(leftAnswer.text);
+    if (position == 1) say(middleAnswer.text);
+    if (position == 2) say(rightAnswer.text);
   } else if (event.key === 'Enter') {
     shoot = true;
     shotBall = false;
