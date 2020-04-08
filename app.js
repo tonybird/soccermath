@@ -81,6 +81,9 @@ function getNewProblem(difficulty) {
   middleAnswer.text = mathProblem.answers[1];
   rightAnswer.text = mathProblem.answers[2];
   problem.text = mathProblem.problemString;
+  //this does not speak before user interaction-
+  //having splash page should fix that
+  say(problem.text)
   answerPosition = mathProblem.correctIndex;
 }
 
@@ -398,14 +401,20 @@ function play(delta) {
   if (shoot && shotBall) {
     if (answerPosition == position) {
       // Plays cheers when goal is scored
-      goalSound.play();
+      say("Correct!")
       score++; 
       streak++;
       scoreDisplay.text = "Score: " + score;
-      if (streak % 10 == 0) alert("Streak: " + streak);
+      say(scoreDisplay.text);
+      if (streak % 10 == 0) {
+        alert("Streak: " + streak);
+        say("Streak"+streak)
+      }
+      goalSound.play();
       getNewProblem(difficulty);
     } else {
       // Incorrect
+      say("Incorrect")
       streak = 0;
       getNewProblem(difficulty);
     }
@@ -434,6 +443,6 @@ window.addEventListener('keydown', event => {
     shotBall = false;
     // Plays sound when first shot is taken... might move when
     // we have a START button implemented on our splash page
-    crowdNoise.play();
+    // crowdNoise.play();
   }
 });
