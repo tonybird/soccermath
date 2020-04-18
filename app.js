@@ -80,10 +80,20 @@ function getNewProblem(difficulty) {
   leftAnswer.text = mathProblem.answers[0];
   middleAnswer.text = mathProblem.answers[1];
   rightAnswer.text = mathProblem.answers[2];
-  problem.text = mathProblem.problemString;
+
+  // This if statement checks to see if its a subtraction problem, due to it originally saying "to" instead of "minus"
+  if (mathProblem.problemString.includes('-')) {
+    problem.text = mathProblem.problemString.replace('-', "minus");
+  } else {
+    problem.text = mathProblem.problemString;
+  }
   //this does not speak before user interaction-
   //having splash page should fix that
   say(problem.text)
+
+  // Resets problem string back to having a "-" sign
+  problem.text = mathProblem.problemString;
+
   answerPosition = mathProblem.correctIndex;
 }
 
@@ -127,6 +137,7 @@ let leftX, middleX, rightX, answerY, ballY;
 let missSound;
 let goalSound;
 let crowdNoise;
+let speaker;
 
 function setup() {
   let background = new PIXI.Sprite(
@@ -279,28 +290,26 @@ function setup() {
   app.ticker.add(delta => gameLoop(delta));
 
   // Stadium ambiance plays on a loop
-  crowdNoise = new sound("sounds/crowdSoundEffect.mp3", "crowdSound");
-  document.getElementById("crowdSound").loop = true;
 
-  missSound = new sound("sounds/missSound.wav", "missSound")
-  goalSound = new sound("sounds/goalSound.wav", "goalSound")
+  crowdNoise = new Howl({
+    src: ['sounds/crowdSoundEffect.mp3'],
+    volume: 0.05,
+    autoplay: true,
+    loop: true,
+  })
+
+  goalSound = new Howl({
+    src: ['sounds/goalSound.wav'],
+    volume: 0.05
+  })
+
+  missSound = new Howl({
+    src: ['sounds/missSound.wav'],
+    volume: 0.1
+  })
+  
 }
 
-function sound(src, id) {
-  this.sound = document.createElement("audio");
-  this.sound.id = id;
-  this.sound.src = src;
-  this.sound.setAttribute("preload", "auto");
-  this.sound.setAttribute("controls", "none");
-  this.sound.style.display = "none";
-  document.body.appendChild(this.sound);
-  this.play = function(){
-    this.sound.play();
-  }
-  this.stop = function(){
-    this.sound.pause();
-  }
-}
 
 function gameLoop(delta) {
   // Update the current game state:
@@ -308,11 +317,11 @@ function gameLoop(delta) {
 }
 
 function say(text){
-  var speaker= window.speechSynthesis
-  speaker.resume()
+  speaker= window.speechSynthesis
+  speaker.resume();
   var msg= new SpeechSynthesisUtterance(text);
   console.log('speak function called')
-  msg.volume=1.0;
+  msg.volume=3.0;
   speaker.speak(msg);
 }
 
@@ -345,8 +354,6 @@ function play(delta) {
   if (shoot && shotBall == false) {
     // Move goalie to block if answer is incorrect
     if (answerPosition !== position) {
-      // Plays crowd jeers when shot is blocked.
-      missSound.play();
       if (position === 0) {
         goalie.x = leftX;
       } else if (position === 1) {
@@ -401,6 +408,7 @@ function play(delta) {
   if (shoot && shotBall) {
     if (answerPosition == position) {
       // Plays cheers when goal is scored
+      speaker.cancel();
       say("Correct!")
       score++; 
       streak++;
@@ -414,7 +422,10 @@ function play(delta) {
       getNewProblem(difficulty);
     } else {
       // Incorrect
+      speaker.cancel();
       say("Incorrect")
+      // Plays crowd jeers when shot is blocked.
+      missSound.play();
       streak = 0;
       getNewProblem(difficulty);
     }
@@ -427,12 +438,14 @@ function play(delta) {
 window.addEventListener('keydown', event => {
   if (event.key === 'ArrowRight' || event.key === 'Tab') {
     position++;
+    speaker.cancel();
     if (position == 3) position = 0;
     if (position == 0) say(leftAnswer.text);
     if (position == 1) say(middleAnswer.text);
     if (position == 2) say(rightAnswer.text);
   } else if (event.key === 'ArrowLeft') {
     position--;
+    speaker.cancel();
     if (position == -1) position = 2;
     if (position == 3) position = 0;
     if (position == 0) say(leftAnswer.text);
