@@ -99,7 +99,8 @@ let app = new PIXI.Application({
 // app.renderer.autoResize = true;
 // app.renderer.resize(window.innerWidth, window.innerHeight);
 
-document.body.appendChild(app.view);
+let display = document.getElementById("display");
+display.appendChild(app.view);
 
 PIXI.loader
   .add([
@@ -118,6 +119,7 @@ let shotBall = false;
 let inactiveArrowAlpha = 0.3;
 let leftArrow, leftAnswer, middleArrow, middleAnswer, rightArrow, rightAnswer;
 let problem, answerPosition, score = 0, streak = 0, position = 0;
+let difficulties = ["easy", "medium", "hard"];
 let difficulty = "easy";
 let ball, goalie;
 let leftX, middleX, rightX, answerY, ballY;
@@ -129,6 +131,8 @@ function setup() {
   let background = new PIXI.Sprite(
     PIXI.loader.resources["images/soccer_goal.jpg"].texture
   );
+
+  difficulty = document.getElementById("difficulty").value;
 
   leftX = 110;
   middleX = 306;

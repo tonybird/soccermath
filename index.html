@@ -3,18 +3,33 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-
   <title>SoccerMath</title>
-  <!-- <link rel="stylesheet" href="css/style.css"> -->
-
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-<h1>SoccerMath</h1>
-<div id="display">
-    </div>
-    <script src="pixi.js"></script>
-    <script type="text/javascript" src="app.js"></script>
-    <!-- <script type="module" src="math.js"></script> -->
+  <div id="settings">
+    <h1>SoccerMath</h1>
+    <form id="settings-form" onsubmit="return false">
+      <label for="difficulty">Difficulty:</label><br>
+      <select id="difficulty" name="difficulty">
+        <option value="easy">Easy</option>
+        <option value="medium">Medium</option>
+        <option value="hard">Hard</option>
+      </select>
+      <button id="play-button">Play</button>
+    </form>
+  </div>
+  <div id="display">
+  </div>
+  <script src="pixi.js"></script>
+  <script type="text/javascript" src="app.js"></script>
+  <script>
+      document.getElementById("play-button").addEventListener("click", function () {
+        document.getElementById("settings").style.display = "none";
+        document.getElementById("display").style.display = "inline";
+        setup();
+      });
+    </script>
 </body>
 </html>
