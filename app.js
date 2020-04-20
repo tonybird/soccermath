@@ -84,6 +84,8 @@ function getNewProblem(difficulty) {
   // This if statement checks to see if its a subtraction problem, due to it originally saying "to" instead of "minus"
   if (mathProblem.problemString.includes('-')) {
     problem.text = mathProblem.problemString.replace('-', "minus");
+  } else if (mathProblem.problemString.includes('*')) {
+    problem.text = mathProblem.problemString.replace('*', "times");
   } else {
     problem.text = mathProblem.problemString;
   }
