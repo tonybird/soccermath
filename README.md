@@ -1,4 +1,4 @@
-# Soccermath
+# Soccermath <img src="/images/ball.png" alt="soccer ball" width="30"/>
 Soccermath is a soccer penalty kick game targeting elementary school math skills, accessible for users with visual or motor impairments.
 
 ## Play Online
