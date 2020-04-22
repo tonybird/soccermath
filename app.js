@@ -85,7 +85,7 @@ function hardProblem() {
     while (product < 50) {
       x = Math.floor((Math.random() * 20) + 1);
       y = Math.floor((Math.random() * 20) + 1);
-      let product = x*y;
+      product = x*y;
     }
     return generateProblem(x, y, op, false);
   } else {
@@ -118,16 +118,42 @@ function getNewProblem(difficulty) {
   rightAnswer.text = mathProblem.answers[2];
 
   // This if statement checks to see if its a subtraction problem, due to it originally saying "to" instead of "minus"
-  if (mathProblem.problemString.includes('-')) {
-    problem.text = mathProblem.problemString.replace(/-/g, "minus");
-  } else if (mathProblem.problemString.includes('*')) {
-    problem.text = mathProblem.problemString.replace('*', "times");
-  } else {
-    problem.text = mathProblem.problemString;
+  // Checks if first number is negative, if it is, it changes the pronounciation from "minus" to "negative" in order
+  // to prevent confusion by saying double minuses.
+  let isNegative = false;
+  if (mathProblem.problemString.startsWith('-')) {
+    isNegative = true;
+    problem.text = mathProblem.problemString.substr(1);
   }
+  if (mathProblem.problemString.includes(" - ")) {
+    if (isNegative) {
+      problem.text = problem.text.replace('-', "minus");
+    } else {
+      problem.text = mathProblem.problemString.replace('-', "minus");
+    }
+  } else if (mathProblem.problemString.includes('*')) {
+    if (isNegative) {
+      problem.text = problem.text;
+    } else {
+      problem.text = mathProblem.problemString.replace('*', "times");
+    }
+  } else {
+    if (isNegative) {
+      problem.text = problem.text;
+    } else {
+      problem.text = mathProblem.problemString;
+    }
+  }
+
   //this does not speak before user interaction-
   //having splash page should fix that
-  spokenProblemText = problem.text;
+
+  // Says "negative" if problem starts with a negative number.
+  if (isNegative) {
+    spokenProblemText = "negative " + problem.text;
+  } else {
+    spokenProblemText = problem.text;
+  }
   say(spokenProblemText);
 
   // Resets problem string back to having a "-" sign
@@ -484,17 +510,57 @@ window.addEventListener('keydown', event => {
     position++;
     speaker.cancel();
     if (position == 3) position = 0;
-    if (position == 0) say(leftAnswer.text);
-    if (position == 1) say(middleAnswer.text);
-    if (position == 2) say(rightAnswer.text);
+
+    // Added case for negative answers, changes it from "minus 2" to "negative 2".
+    if (position == 0) {
+      if (leftAnswer.text.includes("-")) {
+        say("negative " + leftAnswer.text.substr(1));
+      } else {
+        say(leftAnswer.text);
+      }
+    }
+    if (position == 1){
+      if (middleAnswer.text.includes("-")) {
+        say("negative " + middleAnswer.text.substr(1));
+      } else {
+        say(middleAnswer.text);
+      }
+    };
+    if (position == 2){
+      if (rightAnswer.text.includes("-")) {
+        say("negative " + rightAnswer.text.substr(1));
+      } else {
+        say(rightAnswer.text);
+      }
+    } 
   } else if (event.key === 'ArrowLeft') {
     position--;
     speaker.cancel();
     if (position == -1) position = 2;
     if (position == 3) position = 0;
-    if (position == 0) say(leftAnswer.text);
-    if (position == 1) say(middleAnswer.text);
-    if (position == 2) say(rightAnswer.text);
+
+    // Added case for negative answers, changes it from "minus 2" to "negative 2".
+    if (position == 0) {
+      if (leftAnswer.text.includes("-")) {
+        say("negative " + leftAnswer.text.substr(1));
+      } else {
+        say(leftAnswer.text);
+      }
+    }
+    if (position == 1){
+      if (middleAnswer.text.includes("-")) {
+        say("negative " + middleAnswer.text.substr(1));
+      } else {
+        say(middleAnswer.text);
+      }
+    };
+    if (position == 2){
+      if (rightAnswer.text.includes("-")) {
+        say("negative " + rightAnswer.text.substr(1));
+      } else {
+        say(rightAnswer.text);
+      }
+    }
   } else if (event.key === 'Enter') {
     shoot = true;
     shotBall = false;
