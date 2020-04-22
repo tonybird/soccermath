@@ -1,6 +1,4 @@
-// import { easyProblem, mediumProblem } from "./math.js";
-
-function generateProblem(x, y, op, answerRange) {
+function generateProblem(x, y, op, allowNegative) {
   let correctAnswer = 0;
   switch(op) {
     case "+":
@@ -16,7 +14,15 @@ function generateProblem(x, y, op, answerRange) {
 
   let answers = [correctAnswer];
   while (answers.length < 3) {
-      let wrongAnswer = Math.floor((Math.random() * answerRange) + 1);
+      let delta = Math.floor((Math.random() * 20) + 1);
+      let negativeDelta = Math.random() >= 0.5;
+      if (negativeDelta) {
+        delta = -delta;
+      }
+      let wrongAnswer = correctAnswer + delta;
+      if (wrongAnswer < 0 && !allowNegative) {
+        wrongAnswer = -wrongAnswer;
+      }
       if(!answers.includes(wrongAnswer)) {
           answers.push(wrongAnswer);
       }
@@ -44,7 +50,7 @@ function easyProblem() {
       [x,y] = [y,x];
   }
 
-  return generateProblem(x, y, op, 20);
+  return generateProblem(x, y, op, false);
 }
 
 function mediumProblem() {
@@ -65,9 +71,36 @@ function mediumProblem() {
     [x,y] = [y,x];
   }
 
-  return generateProblem(x, y, op, 80);
+  return generateProblem(x, y, op, true);
 }
 
+function hardProblem() {
+  let ops = ["+", "-", "*"];
+  let op = ops[Math.floor(Math.random() * ops.length)];
+
+  let x, y;
+  if (op == "*") {
+    // Positive multiplication problems up to 20x20, where product>=50
+    let product = 0;
+    while (product < 50) {
+      x = Math.floor((Math.random() * 20) + 1);
+      y = Math.floor((Math.random() * 20) + 1);
+      let product = x*y;
+    }
+    return generateProblem(x, y, op, false);
+  } else {
+    // 2-digit addition and subtraction, where one term may be negative
+    x = Math.floor((Math.random() * 100) + 1);
+    y = Math.floor((Math.random() * 100) + 1);
+    let negativeX = Math.random() >= 0.5;
+    if (negativeX) {
+      x = -x;
+    }
+    return generateProblem(x, y, op, true);
+  }
+}
+
+let spokenProblemText = "";
 function getNewProblem(difficulty) {
   switch(difficulty) {
     case "easy":
@@ -76,6 +109,9 @@ function getNewProblem(difficulty) {
     case "medium":
       mathProblem = mediumProblem();
       break;
+    case "hard":
+      mathProblem = hardProblem();
+      break;
   }
   leftAnswer.text = mathProblem.answers[0];
   middleAnswer.text = mathProblem.answers[1];
@@ -83,7 +119,7 @@ function getNewProblem(difficulty) {
 
   // This if statement checks to see if its a subtraction problem, due to it originally saying "to" instead of "minus"
   if (mathProblem.problemString.includes('-')) {
-    problem.text = mathProblem.problemString.replace('-', "minus");
+    problem.text = mathProblem.problemString.replace(/-/g, "minus");
   } else if (mathProblem.problemString.includes('*')) {
     problem.text = mathProblem.problemString.replace('*', "times");
   } else {
@@ -91,7 +127,8 @@ function getNewProblem(difficulty) {
   }
   //this does not speak before user interaction-
   //having splash page should fix that
-  say(problem.text)
+  spokenProblemText = problem.text;
+  say(spokenProblemText);
 
   // Resets problem string back to having a "-" sign
   problem.text = mathProblem.problemString;
@@ -144,6 +181,7 @@ let crowdNoise;
 let speaker;
 
 function setup() {
+  say("Let's play soccer! Use left and right arrow keys to aim. Press enter to shoot. Press space to repeat question.");
   let background = new PIXI.Sprite(
     PIXI.loader.resources["images/soccer_goal.jpg"].texture
   );
@@ -463,5 +501,7 @@ window.addEventListener('keydown', event => {
     // Plays sound when first shot is taken... might move when
     // we have a START button implemented on our splash page
     // crowdNoise.play();
+  } else if (event.key === ' ' || event.key === 'Spacebar') {
+    say(spokenProblemText);
   }
 });
