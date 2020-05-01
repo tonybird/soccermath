@@ -204,9 +204,13 @@ let leftX, middleX, rightX, answerY, ballY;
 let missSound;
 let goalSound;
 let crowdNoise;
-let speaker;
+let speaker= window.speechSynthesis;
+let selVoice;
+let voices;
 
 function setup() {
+  selVoice=document.getElementById("voiceSelect").value;
+  voiceSetup();
   say("Let's play soccer! Use left and right arrow keys to aim. Press enter to shoot. Press space to repeat question.");
   let background = new PIXI.Sprite(
     PIXI.loader.resources["images/soccer_goal.jpg"].texture
@@ -386,11 +390,19 @@ function gameLoop(delta) {
   state(delta);
 }
 
+function voiceSetup(){
+  voices=speaker.getVoices()
+}
+
 function say(text){
-  speaker= window.speechSynthesis
+  //speaker= window.speechSynthesis
   speaker.resume();
   var msg= new SpeechSynthesisUtterance(text);
-  console.log('speak function called')
+  for(i = 0; i < voices.length ; i++) {
+    if(voices[i].name === selVoice) {
+      msg.voice = voices[i];
+    }
+  }
   msg.volume=3.0;
   speaker.speak(msg);
 }
