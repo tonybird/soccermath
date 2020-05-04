@@ -209,9 +209,7 @@ let selVoice;
 let voices;
 
 function setup() {
-  selVoice=document.getElementById("voiceSelect").value;
   voiceSetup();
-  say("Let's play soccer! Use left and right arrow keys to aim. Press enter to shoot. Press space to repeat question.");
   let background = new PIXI.Sprite(
     PIXI.loader.resources["images/soccer_goal.jpg"].texture
   );
@@ -519,6 +517,11 @@ function play(delta) {
     position = 1;
   }
 }
+function startupSound() {
+  selVoice=document.getElementById("voiceSelect").value;
+  say("Let's play soccer! Use left and right arrow keys to aim. Press enter to shoot. Press space to repeat question.");
+}
+
 
 window.addEventListener('keydown', event => {
   if (event.key === 'ArrowRight' || event.key === 'Tab') {
