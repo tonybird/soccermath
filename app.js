@@ -101,6 +101,7 @@ function hardProblem() {
 }
 
 let spokenProblemText = "";
+let start = false;
 function getNewProblem(difficulty) {
   switch(difficulty) {
     case "easy":
@@ -154,7 +155,9 @@ function getNewProblem(difficulty) {
   } else {
     spokenProblemText = problem.text;
   }
-  say(spokenProblemText);
+  if (start) {
+    say(spokenProblemText);
+  }
 
   // Resets problem string back to having a "-" sign
   problem.text = mathProblem.problemString;
@@ -518,6 +521,7 @@ function play(delta) {
   }
 }
 function startupSound() {
+  start = true;
   selVoice=document.getElementById("voiceSelect").value;
   say("Let's play soccer! Use left and right arrow keys to aim. Press enter to shoot. Press space to repeat question.");
 }
