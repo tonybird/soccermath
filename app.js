@@ -395,6 +395,9 @@ function voiceSetup(){
 }
 
 function say(text){
+  if (selVoice == "None") {
+    return;
+  }
   //speaker= window.speechSynthesis
   speaker.resume();
   var msg= new SpeechSynthesisUtterance(text);

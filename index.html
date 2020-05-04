@@ -9,16 +9,24 @@
 
 <body>
   <div id="settings">
-    <h1>SoccerMath</h1>
+    <div id="title">
+        <img src="images/ball.png" alt="Soccer ball" width="60" height="60"/>
+        <h1>SoccerMath</h1>
+    </div>
     <form id="settings-form" onsubmit="return false">
+      <p>
       <label for="difficulty">Difficulty:</label><br>
       <select id="difficulty" name="difficulty">
         <option value="easy">Easy</option>
         <option value="medium">Medium</option>
         <option value="hard">Hard</option>
       </select>
+    </p>
+    <p>
+      <label for="voiceSelect">Voice:</label><br>
       <select id="voiceSelect" name="voiceSelect">
         <option data-lang="en-US" data-name="Alex" value="Alex">Alex (en-US) -- DEFAULT</option>
+        <option data-lang="en-US" data-name="None" value="None">-- No Voice --</option>
         <option data-lang="en-GB" data-name="Daniel" value="Daniel">Daniel (en-GB)</option>
         <option data-lang="en" data-name="Fiona" value="Fiona">Fiona (en)</option>
         <option data-lang="en-US" data-name="Fred" value="Fred">Fred (en-US)</option>
@@ -31,6 +39,7 @@
         <option data-lang="en-GB" data-name="Google UK English Female" value="Google UK English Female">Google UK English Female (en-GB)</option>
         <option data-lang="en-GB" data-name="Google UK English Male" value="Google UK English Male">Google UK English Male (en-GB)</option>
       </select>
+    </p>
       <button id="play-button">Play</button>
     </form>
   </div>
